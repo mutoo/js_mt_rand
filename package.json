@@ -1,0 +1,21 @@
+{
+  "name": "js_mt_rand",
+  "version": "1.0.0",
+  "description": "A pesudo-random generator that can produce same numbers with given seed as php's mt_rand do.",
+  "main": "js_mt_rand.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mutoo/js_mt_rand.git"
+  },
+  "keywords": [
+    "php",
+    "mt",
+    "rand"
+  ],
+  "author": "mutoo",
+  "license": "PHP 3.01",
+  "bugs": {
+    "url": "https://github.com/mutoo/js_mt_rand/issues"
+  },
+  "homepage": "https://github.com/mutoo/js_mt_rand"
+}
