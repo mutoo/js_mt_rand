@@ -1,0 +1,9 @@
+.idea
+yarn-error.log
+*.tar
+*.taz
+
+example/
+.babelrc
+rolup.config.js
+yarn.lock

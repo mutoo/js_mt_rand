@@ -1,21 +1,33 @@
 {
   "name": "js_mt_rand",
-  "version": "1.0.0",
-  "description": "A pesudo-random generator that can produce same numbers with given seed as php's mt_rand do.",
-  "main": "js_mt_rand.js",
+  "version": "2.0.0",
+  "description": "A pseudo-random generator that can produce the same numbers as the php's mt_rand do with given seed.",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "rollup --config",
+    "test": "jasmine"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mutoo/js_mt_rand.git"
   },
   "keywords": [
-    "php",
-    "mt",
-    "rand"
+    "mt_rand",
+    "mt19937",
+    "random",
+    "php"
   ],
   "author": "mutoo",
-  "license": "PHP 3.01",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/mutoo/js_mt_rand/issues"
   },
-  "homepage": "https://github.com/mutoo/js_mt_rand"
+  "homepage": "https://github.com/mutoo/js_mt_rand",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "jasmine": "^3.1.0",
+    "rollup": "^0.59.0",
+    "rollup-plugin-babel": "^3.0.4"
+  }
 }

@@ -1,38 +1,44 @@
 js_mt_rand
 ==========
 
-A pesudo-random generator that can produce same numbers with given seed as php's mt_rand do.
+A pseudo-random generator that can produce the same numbers as php's mt_rand do with given seed.
 
-javascript version of 32-bit php_mt_rand;
-ported from [/php/ext/standard/rand.c](http://lxr.php.net/xref/PHP_5_4/ext/standard/rand.c)
+the javascript version of 32-bit php_mt_rand;
+ported from [php-src/ext/standard/mt_rand.c](https://github.com/php/php-src/blob/master/ext/standard/mt_rand.c)
 
 
-install
+Install
 -------
 
+### via npm
 ```
 $ npm install js_mt_rand
+```
+
+### via yarn
+```
+$ yarn add js_mt_rand
 ```
 
 Usage
 -----
 
 ```javascript
-var mt = require("js_mt_rand")
+let mt = new JSMTRand();
 
-// set seed
+// seed the generator
 mt.srand(0);
 
 // get next random number
-var n = mt.rand(); 
-
-console.log(n);
-// 963932192
+let n = mt.rand();
 ```
+
+Changelog
+---------
+
+See [CHANGELOG](CHANGELOG.md)
 
 License
 -------
 
-PHP 3.01
-
-This product includes PHP software, freely available from <http://www.php.net/software/>
+The MIT License (MIT)
