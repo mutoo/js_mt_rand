@@ -1,4 +1,5 @@
 import {spawn} from 'child_process';
+import {promisify} from 'util';
 import path from 'path';
 import JSMTRand from '../lib';
 
@@ -21,7 +22,7 @@ describe('JSMTRand', () => {
     return ret;
   };
 
-  const getRandomNumbersPHP = function(seed, mode, callback) {
+  let getRandomNumbersPHP = promisify(function(seed, mode, callback) {
     let php = spawn('php',
         [generatorPHP, '-s', seed, '-m', mode, '-c', GENERATE_COUNT]);
 
@@ -41,10 +42,13 @@ describe('JSMTRand', () => {
     });
 
     php.on('close', (code) => {
-      // console.info(`child process exited with code ${code}`);
-      callback(code === 0 ? ret : null);
+      if (code !== 0) {
+        callback(`child process exited with code ${code}`, null);
+      } else {
+        callback(null, ret);
+      }
     });
-  };
+  });
 
   describe('srand', () => {
     it('should get the same result when use the same seed', () => {
@@ -65,51 +69,46 @@ describe('JSMTRand', () => {
   const seedGenerator = new JSMTRand();
   seedGenerator.srand();
 
-  const runMultipleSeeds = (mode, done) => {
+  const runMultipleSeeds = (mode) => {
     let expects = [];
     for (let i = 0; i < SEEDS_COUNT; i++) {
-      let deferred = Promise.defer();
       let seed = seedGenerator.rand();
-      getRandomNumbersPHP(seed, mode, (ret) => {
+      expects.push(getRandomNumbersPHP(seed, mode).then((ret) => {
         expect(getRandomNumbersJS(seed, mode)).
             toEqual(ret);
-        deferred.resolve();
-      });
-      expects.push(deferred);
+      }));
     }
 
-    Promise.all(expects).then(done);
+    return Promise.all(expects);
   };
 
   describe('MODE_MT_RAND_19937', () => {
     it('should generate a same sequence of numbers as the php_mt_rand (seed=0)',
         (done) => {
-          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_19937, (ret) => {
+          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_19937).then((ret) => {
             expect(getRandomNumbersJS(0, JSMTRand.MODE_MT_RAND_19937)).
                 toEqual(ret);
-            done();
-          });
+          }).then(done);
         });
 
     it('should generate a same sequence of numbers as the php_mt_rand',
         (done) => {
-          runMultipleSeeds(JSMTRand.MODE_MT_RAND_19937, done);
+          runMultipleSeeds(JSMTRand.MODE_MT_RAND_19937).then(done);
         });
   });
 
   describe('MODE_MT_RAND_PHP', () => {
     it('should generate a same sequence of numbers as the php_mt_rand (seed=0)',
         (done) => {
-          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_PHP, (ret) => {
+          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_PHP).then((ret) => {
             expect(getRandomNumbersJS(0, JSMTRand.MODE_MT_RAND_PHP)).
                 toEqual(ret);
-            done();
-          });
+          }).then(done);
         });
 
     it('should generate a same sequence of numbers as the php_mt_rand',
         (done) => {
-          runMultipleSeeds(JSMTRand.MODE_MT_RAND_PHP, done);
+          runMultipleSeeds(JSMTRand.MODE_MT_RAND_PHP).then(done);
         });
   });
 });
