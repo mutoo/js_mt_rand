@@ -110,7 +110,7 @@
    * @returns {number}
    */
   function generateSeed() {
-    return Math.random() * Number.MAX_VALUE;
+    return Math.random() * Math.pow(2, 32) >>> 0;
   }
 
   var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -218,7 +218,7 @@
       /**
        * Seed the generator with a simple uint32
        * @param {number} seed
-       * @param {string} mode
+       * @param {number} mode
        * @private
        */
 
@@ -260,14 +260,15 @@
        * Seed the generator
        *
        * @param {number} [seed]
-       * @param {string} [mode]
+       * @param {number} [mode]
        */
 
     }, {
       key: 'srand',
-      value: function srand(seed, mode) {
-        seed = seed || generateSeed();
-        mode = mode || JSMTRand.MODE_MT_RAND_19937;
+      value: function srand() {
+        var seed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : generateSeed();
+        var mode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : JSMTRand.MODE_MT_RAND_19937;
+
         this.mtSRand_(seed, mode);
       }
 
@@ -310,10 +311,10 @@
   /* Uses the fixed, correct, Mersenne Twister implementation, available as of PHP 7.1.0. */
 
 
-  JSMTRand.MODE_MT_RAND_19937 = 'mode_mt_rand_19937';
+  JSMTRand.MODE_MT_RAND_19937 = 0;
 
   /* Uses an incorrect Mersenne Twister implementation which was used as the default up till PHP 7.1.0. This mode is available for backward compatibility. */
-  JSMTRand.MODE_MT_RAND_PHP = 'mode_mt_rand_php';
+  JSMTRand.MODE_MT_RAND_PHP = 1;
 
   return JSMTRand;
 
