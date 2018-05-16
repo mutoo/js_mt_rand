@@ -1,8 +1,8 @@
 {
   "name": "js_mt_rand",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "A pseudo-random generator that can produce the same numbers as the php's mt_rand do with given seed.",
-  "main": "lib/index.js",
+  "main": "dist/JSMTRand.js",
   "scripts": {
     "build": "cross-env BABEL_ENV=production rollup --config",
     "test": "cross-env BABEL_ENV=test jasmine"
@@ -12,7 +12,9 @@
     "url": "https://github.com/mutoo/js_mt_rand.git"
   },
   "keywords": [
-    "mt_rand",
+    "mersenne twister",
+    "mt",
+    "mtrand",
     "mt19937",
     "random",
     "php"

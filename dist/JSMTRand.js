@@ -1,5 +1,5 @@
 /**
- * JSMTRand version 2.0.1
+ * JSMTRand version 2.0.3
  * (c) 2015-2018 Mutoo
  * Released under the MIT License.
  */
