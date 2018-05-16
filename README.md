@@ -48,3 +48,17 @@ License
 -------
 
 The MIT License (MIT)
+
+Credits
+-------
+Authors of PHP 7.1+: 
+Rasmus Lerdorf,
+Zeev Suraski,
+Pedro Melo,
+Sterling Hughes.
+
+Based on code from: 
+Richard J. Wagner,
+Makoto Matsumoto,
+Takuji Nishimura,
+Shawn Cokus.
