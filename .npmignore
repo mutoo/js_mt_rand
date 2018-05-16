@@ -1,9 +1,11 @@
+.npmignore
 .idea
 yarn-error.log
 *.tar
-*.taz
+*.tgz
+js_mt_rand-*/
 
-example/
+spec/
 .babelrc
-rolup.config.js
+rollup.config.js
 yarn.lock
