@@ -1,5 +1,5 @@
 /**
- * JSMTRand version 2.0.0
+ * JSMTRand version 2.0.1
  * (c) 2015-2018 Mutoo
  * Released under the MIT License.
  */
@@ -45,7 +45,7 @@
    * @returns {number}
    */
   function hiBit(u) {
-    return toUInt32(u) & 0x80000000;
+    return u & 0x80000000;
   }
 
   /**
@@ -55,7 +55,7 @@
    * @returns {number}
    */
   function loBit(u) {
-    return toUInt32(u) & 0x00000001;
+    return u & 0x00000001;
   }
 
   /**
@@ -65,7 +65,7 @@
    * @returns {number}
    */
   function loBits(u) {
-    return toUInt32(u) & 0x7FFFFFFF;
+    return u & 0x7FFFFFFF;
   }
 
   /**
@@ -314,9 +314,6 @@
 
   /* Uses an incorrect Mersenne Twister implementation which was used as the default up till PHP 7.1.0. This mode is available for backward compatibility. */
   JSMTRand.MODE_MT_RAND_PHP = 'mode_mt_rand_php';
-
-  /* Version of js_mt_rand */
-  JSMTRand.version = '2.0.0';
 
   return JSMTRand;
 

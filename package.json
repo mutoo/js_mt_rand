@@ -1,11 +1,11 @@
 {
   "name": "js_mt_rand",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A pseudo-random generator that can produce the same numbers as the php's mt_rand do with given seed.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rollup --config",
-    "test": "jasmine"
+    "build": "cross-env BABEL_ENV=production rollup --config",
+    "test": "cross-env BABEL_ENV=test jasmine"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,8 @@
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "cross-env": "^5.1.5",
     "jasmine": "^3.1.0",
     "rollup": "^0.59.0",
     "rollup-plugin-babel": "^3.0.4"
