@@ -6,49 +6,58 @@ import JSMTRand from '../lib';
 const generatorPHP = path.resolve(__dirname, 'helpers/generator.php');
 console.info('PHP generator:', generatorPHP);
 
+const SINGLE_ASSERTION_TEST_COUNT = 10;
 const GENERATE_COUNT = 65535;
-const SEEDS_COUNT = 10; // how many child process would run for php generator
+const SEEDS_COUNT = 20; // how many child process would run for php generator
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000; // in ms
 
 describe('JSMTRand', () => {
   const mt = new JSMTRand();
 
-  const getRandomNumbersJS = function(seed, mode) {
+  const getRandomNumbersJS = function(
+      seed, mode, min = 0, max = JSMTRand.getrandmax()) {
     mt.srand(seed, mode);
 
     let ret = [];
     for (let i = 0; i < GENERATE_COUNT; i++) {
-      ret.push(mt.rand());
+      ret.push(mt.rand(min, max));
     }
     return ret;
   };
 
-  let getRandomNumbersPHP = promisify(function(seed, mode, callback) {
-    let php = spawn('php',
-        [generatorPHP, '-s', seed, '-m', mode, '-c', GENERATE_COUNT]);
+  let getRandomNumbersPHP = promisify(
+      function(seed, mode, min, max, callback) {
+        let params = [
+          '-s', seed, '-m', mode, '-a', min, '-b', max, '-c', GENERATE_COUNT];
 
-    let ret = [];
+        console.log(`\n${JSON.stringify(params)}`);
 
-    php.stdout.on('data', (data) => {
-      // console.info('stdout', data);
-      ret = ret.concat(data.toString().match(/\d+/g).map(x => parseInt(x)));
-    });
+        let php = spawn('php', [generatorPHP, ...params]);
 
-    php.stderr.on('data', (data) => {
-      console.error('PHP generator:', data.toString());
-    });
+        let ret = [];
 
-    php.on('error', (error) => {
-      console.error(error);
-    });
+        php.stdout.on('data', (data) => {
+          // console.info('stdout', data);
+          ret = ret.concat(data.toString().match(/\d+/g).map(x => parseInt(x)));
+        });
 
-    php.on('close', (code) => {
-      if (code !== 0) {
-        callback(`child process exited with code ${code}`, null);
-      } else {
-        callback(null, ret);
-      }
-    });
-  });
+        php.stderr.on('data', (data) => {
+          console.error('PHP generator:', data.toString());
+        });
+
+        php.on('error', (error) => {
+          console.error(error);
+        });
+
+        php.on('close', (code) => {
+          if (code !== 0) {
+            callback(`child process exited with code ${code}`, null);
+          } else {
+            callback(null, ret);
+          }
+        });
+      });
 
   describe('srand', () => {
     it('should get the same result when use the same seed', () => {
@@ -64,6 +73,28 @@ describe('JSMTRand', () => {
     it('should generator random number', () => {
       expect(mt.rand()).toEqual(jasmine.any(Number));
     });
+
+    const generatorRange = function(min, max) {
+      for (let i = 0; i < SINGLE_ASSERTION_TEST_COUNT; i++) {
+        let r = mt.rand(min, max);
+        expect(r).not.toBeLessThan(min);
+        expect(r).not.toBeGreaterThan(max);
+      }
+    };
+
+    it('should generator random number between min and max', () => {
+      mt.srand(0, JSMTRand.MODE_MT_RAND_PHP);
+      generatorRange(0, 1);
+      generatorRange(0, 2);
+      generatorRange(0, 3);
+      generatorRange(0, 0xFFFFFFFF - 1);
+
+      mt.srand(0, JSMTRand.MODE_MT_RAND_19937);
+      generatorRange(0, 1);
+      generatorRange(0, 2);
+      generatorRange(0, 3);
+      generatorRange(0, 0xFFFFFFFF - 1);
+    });
   });
 
   const seedGenerator = new JSMTRand();
@@ -72,9 +103,16 @@ describe('JSMTRand', () => {
   const runMultipleSeeds = (mode) => {
     let expects = [];
     for (let i = 0; i < SEEDS_COUNT; i++) {
+      let min = seedGenerator.rand();
+      let max = seedGenerator.rand();
+
+      if (min > max) {
+        [min, max] = [max, min];
+      }
+
       let seed = seedGenerator.rand();
-      expects.push(getRandomNumbersPHP(seed, mode).then((ret) => {
-        expect(getRandomNumbersJS(seed, mode)).
+      expects.push(getRandomNumbersPHP(seed, mode, min, max).then((ret) => {
+        expect(getRandomNumbersJS(seed, mode, min, max)).
             toEqual(ret);
       }));
     }
@@ -85,10 +123,15 @@ describe('JSMTRand', () => {
   describe('MODE_MT_RAND_19937', () => {
     it('should generate a same sequence of numbers as the php_mt_rand (seed=0)',
         (done) => {
-          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_19937).then((ret) => {
-            expect(getRandomNumbersJS(0, JSMTRand.MODE_MT_RAND_19937)).
-                toEqual(ret);
-          }).then(done);
+          let min = 0;
+          let max = JSMTRand.getrandmax();
+          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_19937, min, max).
+              then((ret) => {
+                expect(getRandomNumbersJS(0, JSMTRand.MODE_MT_RAND_19937, min,
+                    max)).
+                    toEqual(ret);
+              }).
+              then(done);
         });
 
     it('should generate a same sequence of numbers as the php_mt_rand',
@@ -100,10 +143,15 @@ describe('JSMTRand', () => {
   describe('MODE_MT_RAND_PHP', () => {
     it('should generate a same sequence of numbers as the php_mt_rand (seed=0)',
         (done) => {
-          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_PHP).then((ret) => {
-            expect(getRandomNumbersJS(0, JSMTRand.MODE_MT_RAND_PHP)).
-                toEqual(ret);
-          }).then(done);
+          let min = 0;
+          let max = JSMTRand.getrandmax();
+          getRandomNumbersPHP(0, JSMTRand.MODE_MT_RAND_PHP, min, max).
+              then((ret) => {
+                expect(
+                    getRandomNumbersJS(0, JSMTRand.MODE_MT_RAND_PHP, min, max)).
+                    toEqual(ret);
+              }).
+              then(done);
         });
 
     it('should generate a same sequence of numbers as the php_mt_rand',

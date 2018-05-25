@@ -5,13 +5,15 @@ if (version_compare(phpversion(), '7.1') < 0) {
     exit(1);
 }
 
-$options = getopt('s:m:c:');
+$options = getopt('s:m:a:b:c:');
 
 $seed = $options['s'];
 $mode = $options['m'];
+$min = $options['a'];
+$max = $options['b'];
 $count = $options['c'];
 
 mt_srand($seed, $mode);
 for ($i = 0; $i < $count; $i++) {
-    printf("%d\n", mt_rand());
+    printf("%d\n", mt_rand($min, $max));
 }

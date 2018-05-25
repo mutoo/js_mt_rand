@@ -1,5 +1,5 @@
 /**
- * JSMTRand version 2.0.3
+ * JSMTRand version 2.1.0
  * (c) 2015-2018 Mutoo
  * Released under the MIT License.
  */
@@ -15,7 +15,7 @@
   /* A period parameter */
   var M = 397;
 
-  /* 2^31, compatibility with the php_rand */
+  /* 2 ^ 31 - 1, compatibility with the php_rand */
   var MT_RAND_MAX = 0x7FFFFFFF;
 
   /**
@@ -111,6 +111,50 @@
    */
   function generateSeed() {
     return Math.random() * Math.pow(2, 32) >>> 0;
+  }
+
+  /*
+   * A bit of tricky math here.  We want to avoid using a modulus because
+   * that simply tosses the high-order bits and might skew the distribution
+   * of random values over the range.  Instead we map the range directly.
+   *
+   * We need to map the range from 0...M evenly to the range a...b
+   * Let n = the random number and n' = the mapped random number
+   *
+   * Then we have: n' = a + n(b-a)/M
+   *
+   * We have a problem here in that only n==M will get mapped to b which
+   # means the chances of getting b is much much less than getting any of
+   # the other values in the range.  We can fix this by increasing our range
+   # artificially and using:
+   #
+   #               n' = a + n(b-a+1)/M
+   *
+   # Now we only have a problem if n==M which would cause us to produce a
+   # number of b+1 which would be bad.  So we bump M up by one to make sure
+   # this will never happen, and the final algorithm looks like this:
+   #
+   #               n' = a + n(b-a+1)/(M+1)
+   *
+   * -RL
+   */
+  function randRangeBadScaling(n, min, max, tmax) {
+    return min + (max - min + 1) * (n / (tmax + 1.0)) >>> 0;
+  }
+
+  /**
+   * Helper function to output unexpected value to console.
+   *
+   * @param {boolean} n
+   * @param {string} reason
+   * @returns {*}
+   */
+  function unexpected(n, reason) {
+    if (n) {
+      console.warn('unexpected: ' + reason);
+    }
+
+    return n;
   }
 
   var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -244,6 +288,10 @@
     }, {
       key: 'mtRand_',
       value: function mtRand_() {
+        if (!this.mt_rand_is_seeded_) {
+          this.srand();
+        }
+
         if (this.left_ === 0) {
           this.mtReload_();
         }
@@ -253,7 +301,70 @@
         rand ^= rand >>> 11;
         rand ^= rand << 7 & 0x9d2c5680;
         rand ^= rand << 15 & 0xefc60000;
-        return rand ^ rand >>> 18;
+        rand ^= rand >>> 18;
+        return toUInt32(rand);
+      }
+    }, {
+      key: 'randRange32_',
+      value: function randRange32_(max) {
+        max = toUInt32(max);
+
+        var result = this.mtRand_();
+
+        /* Special case where no modulus is required */
+        if (unexpected(max === 0xFFFFFFFF, 'max is 0xffffffff')) {
+          return result;
+        }
+
+        /* Increment the max so the range is inclusive of max */
+        max++;
+
+        /* Powers of two are not biased */
+        if (max & max - 1 === 0) {
+          return result & max - 1;
+        }
+
+        /* Ceiling under which UINT32_MAX % max == 0 */
+        // let limit = toUInt32(0xFFFFFFFF - (0xFFFFFFFF % max) - 1);
+
+        /* Discard numbers over the limit to avoid modulo bias */
+        // while (unexpected(result > limit, 'result > limit')) {
+        //   result = this.mtRand_();
+        // }
+
+        return result % max;
+      }
+    }, {
+      key: 'randRange64_',
+      value: function randRange64_(max) {
+        console.error('bit operators in javascript does not support 64 bit integer yet.', this);
+      }
+    }, {
+      key: 'mtRandRange_',
+      value: function mtRandRange_(min, max) {
+        var umax = max - min;
+        if (unexpected(umax > 0xFFFFFFFF, 'umax > 0xffffffff')) {
+          return this.randRange64_(umax);
+        }
+
+        return min + this.randRange32_(umax);
+      }
+    }, {
+      key: 'mtRandCommon',
+      value: function mtRandCommon(min, max) {
+        switch (this.mode_) {
+          case JSMTRand.MODE_MT_RAND_PHP:
+            /**
+             * mt_rand() returns 32 random bits.
+             * but php_rand only returns 31 at most.
+             */
+            var n = this.mtRand_() >>> 1;
+            return randRangeBadScaling(n, min, max, JSMTRand.getrandmax());
+
+          default:
+          case JSMTRand.MODE_MT_RAND_19937:
+            return this.mtRandRange_(min, max);
+        }
       }
 
       /**
@@ -275,21 +386,29 @@
       /**
        * Get the next random number
        *
-       * @return {number}
+       * @return {number|null}
        */
 
     }, {
       key: 'rand',
       value: function rand() {
-        if (!this.mt_rand_is_seeded_) {
-          this.srand();
+        var min = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var max = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : JSMTRand.getrandmax();
+
+        if (arguments.length === 0) {
+          /**
+           * mtRand_() returns 32 random bits.
+           * but php_rand only returns 31 at most.
+           */
+          return this.mtRand_() >>> 1;
         }
 
-        /**
-         * mt_rand() returns 32 random bits.
-         * but php_rand only returns 31 at most.
-         */
-        return this.mtRand_() >>> 1;
+        if (unexpected(max < min)) {
+          console.error('JSMTRand.rand(min, max): expected min <= max.');
+          return null;
+        }
+
+        return this.mtRandCommon(min, max);
       }
 
       /**

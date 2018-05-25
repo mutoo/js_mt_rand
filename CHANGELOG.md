@@ -1,6 +1,10 @@
 Changelog
 =========
 
+2.1.0 (May 26, 2018)
+--------------------
+* Support range params 
+
 2.0.1 (May 16, 2018)
 --------------------
 * Add Unit Tests
