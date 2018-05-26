@@ -1,7 +1,7 @@
 <?php
 
-if (version_compare(phpversion(), '7.1') < 0) {
-    file_put_contents('php://stderr', 'Please use PHP 7.1+ to run this example', FILE_APPEND);
+if (version_compare(phpversion(), '7.2.0') < 0) {
+    file_put_contents('php://stderr', 'Please use PHP 7.2+ to run this example', FILE_APPEND);
     exit(1);
 }
 

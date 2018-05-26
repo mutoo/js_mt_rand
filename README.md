@@ -48,6 +48,13 @@ let n = mt.rand();
 let r = mt.rand(min, max);
 ```
 
+Pitfall
+-------
+
+Due to the PHP 7.1.0 to 7.2.0beta2 mt_rand() modulo bias [bug](https://externals.io/message/100229), the `JSMTRand.rand(min, max)` may return different results between php 7.1.0 to 7.2.0beta2, just use `JSMTRand.rand()` instead and wrap your own range function.
+
+Since the bip operators in javascript are not support 64 bits integer yet, the generator would only work with 32 bits range.
+
 Changelog
 ---------
 

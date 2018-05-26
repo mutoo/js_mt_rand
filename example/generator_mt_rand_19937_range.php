@@ -1,7 +1,7 @@
 <?php
 
-if (version_compare(phpversion(), '7.1') < 0) {
-    printf('Please use PHP 7.1+ to run this example');
+if (version_compare(phpversion(), '7.2') < 0) {
+    printf('Please use PHP 7.2+ to run this example');
     exit(1);
 }
 

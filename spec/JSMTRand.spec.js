@@ -3,6 +3,8 @@ import {promisify} from 'util';
 import path from 'path';
 import JSMTRand from '../lib';
 
+const PHP = 'php'; // version: PHP 7.2+
+// const PHP = path.resolve('/Applications/MAMP/bin/php/php7.2.1/bin/php');
 const generatorPHP = path.resolve(__dirname, 'helpers/generator.php');
 console.info('PHP generator:', generatorPHP);
 
@@ -33,7 +35,7 @@ describe('JSMTRand', () => {
 
         console.log(`\n${JSON.stringify(params)}`);
 
-        let php = spawn('php', [generatorPHP, ...params]);
+        let php = spawn(PHP, [generatorPHP, ...params]);
 
         let ret = [];
 

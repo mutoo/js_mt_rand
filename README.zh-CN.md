@@ -43,6 +43,13 @@ let n = mt.rand();
 let r = mt.rand(min, max);
 ```
 
+注意事项
+-------
+
+由于 PHP 7.1.0 到 7.2.0beta2 版本的 mt_rand() 有一个 [bug](https://externals.io/message/100229), 导致了 `JSMTRand.rand(min, max)` 在这几个版本可能返回不一样的结果。遇到这种情况，请使用不带范围参数的 `JSMTRand.rand()` 方法，并自己封装范围取值函数。
+
+另外由于 Javascript 的位运算尚不支持 64 位整数，所以当前随机数的处理范围被限制在 32 位以内。
+
 更新日志
 -------
 
