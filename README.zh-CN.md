@@ -33,6 +33,10 @@ mt.srand(0);
 // 默认使用 php 7.1+ 版的 Mersenne Twister 实现
 mt.srand(0, JSMTRand.MODE_MT_RAND_19937);
 
+// 取随机数，范围 [0, 2 ^ 32 - 1]
+// 注意：MODE_MT_RAND_19937 的范围比 MODE_MT_RAND_PHP 要大
+let m = mt.rand();
+
 // 向后兼容 php 5.x
 mt.srand(0, JSMTRand.MODE_MT_RAND_PHP);
 

@@ -36,7 +36,7 @@ mt.srand(0, JSMTRand.MODE_MT_RAND_19937);
 
 // get next random number, range: [0, 2 ^ 32 - 1)
 // N.B. MODE_MT_RAND_19937 has a wider range than MODE_MT_RAND_PHP
-let m = mt.rand(0, 0xFFFFFFFF);
+let m = mt.rand();
 
 // php 5.x backward compatibility.
 mt.srand(0, JSMTRand.MODE_MT_RAND_PHP);
