@@ -387,15 +387,14 @@
       /**
        * Get the next random number
        *
+       * @param {number|null} min
+       * @param {number|null} max
        * @return {number|null}
        */
 
     }, {
       key: 'rand',
-      value: function rand() {
-        var min = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-        var max = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : JSMTRand.getrandmax();
-
+      value: function rand(min, max) {
         if (arguments.length === 0) {
           /**
            * mtRand_() returns 32 random bits.
@@ -404,7 +403,12 @@
           return this.mtRand_() >>> 1;
         }
 
-        if (unexpected(max < min)) {
+        if (arguments.length !== 2) {
+          console.error('JSMTRand.rand(min, max): expected two params.');
+          return null;
+        }
+
+        if (unexpected(max < min, 'max < min')) {
           console.error('JSMTRand.rand(min, max): expected min <= max.');
           return null;
         }

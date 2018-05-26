@@ -29,23 +29,21 @@ import JSMTRand from 'js_mt_rand';
 let mt = new JSMTRand();
 
 // seed the generator
-mt.srand(0);
+mt.srand(seed);
 
 // php 7.1+ Mersenne Twister implementation (default)
-mt.srand(0, JSMTRand.MODE_MT_RAND_19937);
-
-// get next random number, range: [0, 2 ^ 32 - 1)
-// N.B. MODE_MT_RAND_19937 has a wider range than MODE_MT_RAND_PHP
-let m = mt.rand();
+mt.srand(seed, JSMTRand.MODE_MT_RAND_19937);
 
 // php 5.x backward compatibility.
-mt.srand(0, JSMTRand.MODE_MT_RAND_PHP);
+mt.srand(seed, JSMTRand.MODE_MT_RAND_PHP);
 
 // get next random number, range: [0, 2 ^ 31 - 1]
 let n = mt.rand();
 
+// php 7.2+ Range Random implementation, see pitfall.
 // get next random number in range: [min, max], max is inclusive
-let r = mt.rand(min, max);
+// N.B. MODE_MT_RAND_19937 has a wider range than MODE_MT_RAND_PHP
+let m = mt.rand(min, max);
 ```
 
 Pitfall

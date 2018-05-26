@@ -28,23 +28,21 @@ import JSMTRand from 'js_mt_rand';
 let mt = new JSMTRand();
 
 // 设置随机数种子
-mt.srand(0);
+mt.srand(seed);
 
-// 默认使用 php 7.1+ 版的 Mersenne Twister 实现
-mt.srand(0, JSMTRand.MODE_MT_RAND_19937);
-
-// 取随机数，范围 [0, 2 ^ 32 - 1]
-// 注意：MODE_MT_RAND_19937 的范围比 MODE_MT_RAND_PHP 要大
-let m = mt.rand();
+// 默认使用 php 7.2+ 版的 Mersenne Twister 实现
+mt.srand(seed, JSMTRand.MODE_MT_RAND_19937);
 
 // 向后兼容 php 5.x
-mt.srand(0, JSMTRand.MODE_MT_RAND_PHP);
+mt.srand(seed, JSMTRand.MODE_MT_RAND_PHP);
 
 // 取随机数，范围 [0, 2 ^ 31 - 1]
 let n = mt.rand();
 
 // 取随机数，范围 [min, max]，包含 max
-let r = mt.rand(min, max);
+// php 7.2+ 详情见注意事项.
+// 注意：MODE_MT_RAND_19937 支持的范围比 MODE_MT_RAND_PHP 要大
+let m = mt.rand(min, max);
 ```
 
 注意事项
